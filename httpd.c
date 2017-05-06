@@ -501,7 +501,7 @@ void serve_file(int client, const char *filename)
 int startup(u_short *port)
 {
  int httpd = 0;
- //sockaddr_in 是 IPV4的套接字地址结构。定义在<netinet/in.h>,参读《TLPI》P1202
+ //sockaddr_in 是 IPv4的套接字地址结构。定义在<netinet/in.h>,参读《TLPI》P1202
  struct sockaddr_in name;
  
  //socket()用于创建一个用于 socket 的描述符，函数包含于<sys/socket.h>。参读《TLPI》P1153
@@ -528,7 +528,7 @@ int startup(u_short *port)
  if (*port == 0)  /* if dynamically allocating a port */
  {
   int namelen = sizeof(name);
-  //getsockname()包含于<sys/socker.h>中，参读《TLPI》P1263
+  //getsockname()包含于<sys/socket.h>中，参读《TLPI》P1263
   //调用getsockname()获取系统给 httpd 这个 socket 随机分配的端口号
   if (getsockname(httpd, (struct sockaddr *)&name, &namelen) == -1)
    error_die("getsockname");
@@ -538,6 +538,8 @@ int startup(u_short *port)
  //最初的 BSD socket 实现中，backlog 的上限是5.参读《TLPI》P1156
  if (listen(httpd, 5) < 0) 
   error_die("listen");
+ 
+ // 返回获得的套接字描述符
  return(httpd);
 }
 
@@ -572,17 +574,21 @@ void unimplemented(int client)
 
 int main(void)
 {
+ // 服务端套接字描述符
  int server_sock = -1;
+ // 服务器地址端口
  u_short port = 0;
+ // 客户端套接字描述符
  int client_sock = -1;
- //sockaddr_in 是 IPV4的套接字地址结构。定义在<netinet/in.h>,参读《TLPI》P1202
+ //sockaddr_in 是 IPv4的套接字地址结构。定义在<netinet/in.h>,参读《TLPI》P1202
  struct sockaddr_in client_name;
  int client_name_len = sizeof(client_name);
  //pthread_t newthread;
 
  server_sock = startup(&port);
  printf("httpd running on port %d\n", port);
-
+ 
+ // 循环服务器模型
  while (1)
  {
   //阻塞等待客户端的连接，参读《TLPI》P1157
